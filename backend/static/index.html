@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontdesk AI Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #90e0ef;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --gray-light: #dee2e6;
+      --white: #ffffff;
+      --border-radius: 8px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      background-color: var(--white);
+      padding: 15px 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .header h1 {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .system-status {
+      display: flex;
+      gap: 20px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background-color: var(--light);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--gray);
+    }
+
+    .status-connected .status-dot {
+      background-color: #4ade80;
+    }
+
+    .status-disconnected .status-dot {
+      background-color: var(--danger);
+    }
+
+    .tabs {
+      display: flex;
+      background-color: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .tab {
+      padding: 15px 25px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--gray);
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--primary);
+      background-color: rgba(67, 97, 238, 0.05);
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card {
+      background-color: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 15px 20px;
+      background-color: var(--primary);
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    thead th {
+      font-weight: 600;
+      color: var(--secondary);
+      background-color: rgba(63, 55, 201, 0.05);
+    }
+
+    tbody tr:hover {
+      background-color: rgba(67, 97, 238, 0.05);
+      cursor: pointer;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-resolved {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+
+    form {
+      display: grid;
+      gap: 15px;
+    }
+
+    form label {
+      font-weight: 500;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--border-radius);
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--secondary);
+    }
+
+    button:disabled {
+      background-color: var(--gray-light);
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: 12px 15px;
+      border-radius: var(--border-radius);
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .alert-success {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      border: 1px solid #badbcc;
+    }
+
+    .alert-danger {
+      background-color: #f8d7da;
+      color: #842029;
+      border: 1px solid #f5c2c7;
+    }
+
+    .alert-info {
+      background-color: #cff4fc;
+      color: #055160;
+      border: 1px solid #b6effb;
+    }
+
+    /* Voice Call Specific Styles */
+    .call-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .connection-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .mic-button {
+      width: 70px;
+      height: 70px;
+      background-color: var(--success);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 20px auto;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(76, 201, 240, 0.3);
+    }
+
+    .mic-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgba(76, 201, 240, 0.4);
+    }
+
+    .mic-button.active {
+      background-color: var(--danger);
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 6px 15px rgba(247, 37, 133, 0.4);
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .transcript {
+      height: 300px;
+      overflow-y: auto;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--gray-light);
+      margin-top: 20px;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      max-width: 80%;
+    }
+
+    .user-message {
+      background-color: var(--info);
+      margin-left: auto;
+      border-top-right-radius: 0;
+    }
+
+    .ai-message {
+      background-color: var(--light);
+      border-top-left-radius: 0;
+    }
+
+    .system-message {
+      background-color: var(--gray-light);
+      font-style: italic;
+      font-size: 13px;
+      margin: 5px auto;
+      text-align: center;
+      max-width: 100%;
+      padding: 5px 10px;
+    }
+
+    /* Logs Section */
+    .logs-container {
+      height: 300px;
+      overflow-y: auto;
+      background-color: #212529;
+      color: #f8f9fa;
+      font-family: 'Courier New', monospace;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+      border-bottom: 1px solid #343a40;
+      padding-bottom: 5px;
+    }
+
+    .log-time {
+      color: #6c757d;
+      margin-right: 10px;
+    }
+
+    .log-type {
+      display: inline-block;
+      padding: 2px 5px;
+      border-radius: 3px;
+      margin-right: 10px;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .log-info {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    .log-warn {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .log-error {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .log-success {
+      background-color: #198754;
+      color: white;
+    }
+
+    .log-message {
+      margin-left: 5px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Request Details */
+    .request-details {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(67, 97, 238, 0.05);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--primary-light);
+    }
+
+    .request-property {
+      margin-bottom: 10px;
+    }
+
+    .request-property strong {
+      display: inline-block;
+      width: 120px;
+      font-weight: 600;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .grid-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .call-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        flex-grow: 1;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="header">
+      <h1>Frontdesk AI Dashboard</h1>
+      <div class="system-status">
+        <div id="apiStatus" class="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-label">API</span>
+        </div>
+        <div id="notificationStatus" class="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-label">Notifications</span>
+        </div>
+        <div id="tokenStatus" class="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-label">Token Server</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="requests">Help Requests</div>
+      <div class="tab" data-tab="knowledge">Knowledge Base</div>
+      <div class="tab" data-tab="voice">Voice Call</div>
+      <div class="tab" data-tab="simulator">Call Simulator</div>
+      <div class="tab" data-tab="logs">System Logs</div>
+    </div>
+
+    <!-- Help Requests Tab -->
+    <div id="requests-tab" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <h2>Pending Help Requests</h2>
+        </div>
+        <div class="card-body">
+          <table id="requestsTable">
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Question</th>
+                <th>Caller</th>
+                <th>Created At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="text-center">Loading requests...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Request Details Section -->
+      <div class="card" id="requestDetailsCard" style="display: none;">
+        <div class="card-header">
+          <h2>Request Details</h2>
+        </div>
+        <div class="card-body">
+          <div id="requestDetails" class="request-details">
+            <div class="request-property">
+              <strong>Request ID:</strong> <span id="detailsRequestId">-</span>
+            </div>
+            <div class="request-property">
+              <strong>Question:</strong> <span id="detailsQuestion">-</span>
+            </div>
+            <div class="request-property">
+              <strong>Caller:</strong> <span id="detailsCaller">-</span>
+            </div>
+            <div class="request-property">
+              <strong>Created:</strong> <span id="detailsCreated">-</span>
+            </div>
+            <div class="request-property">
+              <strong>Status:</strong> <span id="detailsStatus">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Submit Answer</h2>
+        </div>
+        <div class="card-body">
+          <div id="resolveFormAlert" class="alert"></div>
+          <form id="resolveForm">
+            <div>
+              <label for="requestId">Request ID:</label>
+              <input type="text" id="requestId" name="requestId" readonly required>
+            </div>
+            <div>
+              <label for="question">Question:</label>
+              <input type="text" id="question" name="question" readonly required>
+            </div>
+            <div>
+              <label for="answer">Your Answer:</label>
+              <textarea id="answer" name="answer" rows="4" required></textarea>
+            </div>
+            <button type="submit">Submit Answer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Knowledge Base Tab -->
+    <div id="knowledge-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Learned Answers</h2>
+        </div>
+        <div class="card-body">
+          <table id="knowledgeTable">
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Answer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="2" class="text-center">Loading knowledge base...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Call Tab -->
+    <div id="voice-tab" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2>LiveKit Voice Call</h2>
+          </div>
+          <div class="card-body">
+            <div id="voiceCallAlert" class="alert"></div>
+            <div class="connection-info">
+              <div>
+                <label for="roomName">Room Name:</label>
+                <input type="text" id="roomName" value="frontdesk-call-1" required>
+              </div>
+              <div>
+                <label for="participantName">Your Name:</label>
+                <input type="text" id="participantName" value="Supervisor" required>
+              </div>
+            </div>
+            <div class="call-controls">
+              <button id="connectButton">Connect</button>
+              <button id="disconnectButton" disabled>Disconnect</button>
+            </div>
+            <div class="mic-button" id="micButton">
+              <i>🎤</i>
+            </div>
+            <div class="transcript" id="transcript">
+              <div class="system-message">Conversation transcript will appear here</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Call Status</h2>
+          </div>
+          <div class="card-body">
+            <div>
+              <p><strong>Connection Status:</strong> <span id="connectionStatus">Disconnected</span></p>
+              <p><strong>Room:</strong> <span id="currentRoom">-</span></p>
+              <p><strong>Microphone:</strong> <span id="micStatus">Inactive</span></p>
+              <p><strong>Active Participants:</strong> <span id="participantCount">0</span></p>
+            </div>
+            <div class="card" style="margin-top: 20px;">
+              <div class="card-header">Pending Requests</div>
+              <div class="card-body">
+                <div id="pendingRequestsForRoom">No pending requests for this room</div>
+              </div>
+            </div>
+            
+            <!-- New section to show request details and check status -->
+            <div class="card" style="margin-top: 20px;">
+              <div class="card-header">Check Request Status</div>
+              <div class="card-body">
+                <form id="checkRequestForm">
+                  <div>
+                    <label for="requestIdToCheck">Request ID:</label>
+                    <input type="text" id="requestIdToCheck" required>
+                  </div>
+                  <button type="submit">Check Status</button>
+                </form>
+                <div id="requestStatusResult" style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 8px; display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call Simulator Tab -->
+    <div id="simulator-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Simulate Incoming Call</h2>
+        </div>
+        <div class="card-body">
+          <div id="simulatorAlert" class="alert"></div>
+          <form id="callForm">
+            <div>
+              <label for="callQuestion">Question:</label>
+              <input type="text" id="callQuestion" required>
+              <button type="button" id="speakButton">🎤 Speak</button>
+            </div>
+            <div>
+              <label for="callerInfo">Caller ID:</label>
+              <input type="text" id="callerInfo" value="room-simulator#123" required>
+            </div>
+            <button type="submit">Simulate Call</button>
+          </form>
+
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">Response</div>
+            <div class="card-body">
+              <pre id="simulationResponse" style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">Response will appear here</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Logs Tab -->
+    <div id="logs-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>System Logs</h2>
+        </div>
+        <div class="card-body">
+          <div class="logs-container" id="systemLogs">
+            <div class="log-entry">
+              <span class="log-time">00:00:00</span>
+              <span class="log-type log-info">INFO</span>
+              <span class="log-message">Dashboard initialized</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.js"></script>
+  <script>
+    // Base URLs for all services
+    const API_BASE_URL = 'http://127.0.0.1:5000';
+    const TOKEN_SERVER_URL = 'http://127.0.0.1:5001';
+    const NOTIFICATION_WS_URL = 'ws://127.0.0.1:5002/ws';
+    
+    // LiveKit configuration
+    const LIVEKIT_SERVER = 'wss://frontdesk-0c98butt.livekit.cloud';
+    
+    // Global variables
+    let room;
+    let connected = false;
+    let micEnabled = false;
+    let localAudioTrack;
+    let notificationSocket;
+    let roomNotificationSocket; // For room-specific notifications
+    let notificationConnected = false;
+    let roomNotificationConnected = false;
+    let currentRoomId = null;
+    let selectedRequestId = null; // Track currently selected request
+    
+    // System logs
+    const logs = [];
+    const MAX_LOGS = 100;
+    
+    // Add log entry
+    function addLog(type, message) {
+      const now = new Date();
+      const timeString = now.toTimeString().split(' ')[0];
+      
+      // Add to logs array
+      logs.unshift({
+        time: timeString,
+        type: type,
+        message: message
+      });
+      
+      // Keep logs array at a reasonable size
+      if (logs.length > MAX_LOGS) {
+        logs.pop();
+      }
+      
+      // Update UI
+      updateLogsUI();
+      
+      // Log to console as well
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+    
+    // Update logs UI
+    function updateLogsUI() {
+      const logsContainer = document.getElementById('systemLogs');
+      logsContainer.innerHTML = '';
+      
+      logs.forEach(log => {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        
+        logEntry.innerHTML = `
+          <span class="log-time">${log.time}</span>
+          <span class="log-type log-${log.type}">${log.type.toUpperCase()}</span>
+          <span class="log-message">${log.message}</span>
+        `;
+        
+        logsContainer.appendChild(logEntry);
+      });
+    }
+    
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => {
+          t.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        const tabName = tab.getAttribute('data-tab');
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        
+        // Add active class to selected tab
+        tab.classList.add('active');
+        
+        // Load data for the selected tab
+        if (tabName === 'requests') {
+          loadPendingRequests();
+        } else if (tabName === 'knowledge') {
+          loadLearnedAnswers();
+        } else if (tabName === 'logs') {
+          updateLogsUI();
+        } else if (tabName === 'voice' && currentRoomId) {
+          loadPendingRequestsForRoom(currentRoomId);
+        }
+      });
+    });
+    
+    // Check services status
+    async function checkServicesStatus() {
+      // Check API status
+      try {
+        const apiResponse = await fetch(`${API_BASE_URL}/`);
+        if (apiResponse.ok) {
+          updateStatusIndicator('apiStatus', true);
+          addLog('info', 'Connected to API server');
+        } else {
+          updateStatusIndicator('apiStatus', false);
+          addLog('error', 'API server returned an error status');
+        }
+      } catch (error) {
+        updateStatusIndicator('apiStatus', false);
+        addLog('error', `API server connection error: ${error.message}`);
+      }
+      
+      // Check token server status
+      try {
+        const tokenResponse = await fetch(`${TOKEN_SERVER_URL}/`);
+        if (tokenResponse.ok) {
+          updateStatusIndicator('tokenStatus', true);
+          addLog('info', 'Connected to token server');
+        } else {
+          updateStatusIndicator('tokenStatus', false);
+          addLog('error', 'Token server returned an error status');
+        }
+      } catch (error) {
+        updateStatusIndicator('tokenStatus', false);
+        addLog('error', `Token server connection error: ${error.message}`);
+      }
+      
+      // Check notification server status
+      connectToNotificationService();
+    }
+    
+    // Update status indicator
+    function updateStatusIndicator(id, connected) {
+      const indicator = document.getElementById(id);
+      if (connected) {
+        indicator.classList.add('status-connected');
+        indicator.classList.remove('status-disconnected');
+      } else {
+        indicator.classList.remove('status-connected');
+        indicator.classList.add('status-disconnected');
+      }
+    }
+    
+    // Connect to notification service for dashboard
+    function connectToNotificationService() {
+      // Close existing connection if any
+      if (notificationSocket) {
+        notificationSocket.close();
+      }
+      
+      try {
+        // Connect to the dashboard room
+        notificationSocket = new WebSocket(`${NOTIFICATION_WS_URL}/dashboard`);
+        
+        notificationSocket.onopen = () => {
+          notificationConnected = true;
+          updateStatusIndicator('notificationStatus', true);
+          addLog('success', 'Connected to notification service');
+          
+          // Send a ping to keep the connection alive
+          setInterval(() => {
+            if (notificationConnected && notificationSocket.readyState === WebSocket.OPEN) {
+              notificationSocket.send(JSON.stringify({ type: 'ping' }));
+            }
+          }, 30000);
+        };
+        
+        notificationSocket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'request_created') {
+              addLog('info', `New help request created: ${data.request_id} - "${data.question}"`);
+              // Reload pending requests
+              loadPendingRequests();
+              // Update room-specific pending requests
+              if (currentRoomId && data.room_id === currentRoomId) {
+                loadPendingRequestsForRoom(currentRoomId);
+              }
+            } else if (data.type === 'request_resolved') {
+              addLog('success', `Help request resolved: ${data.request_id}`);
+              // Reload all data
+              loadPendingRequests();
+              loadLearnedAnswers();
+              // Update room-specific pending requests
+              if (currentRoomId && data.room_id === currentRoomId) {
+                loadPendingRequestsForRoom(currentRoomId);
+              }
+            }
+          } catch (error) {
+            addLog('error', `Error parsing notification: ${error.message}`);
+          }
+        };
+        
+        notificationSocket.onclose = () => {
+          notificationConnected = false;
+          updateStatusIndicator('notificationStatus', false);
+          addLog('warn', 'Disconnected from notification service');
+          
+          // Try to reconnect after 5 seconds
+          setTimeout(connectToNotificationService, 5000);
+        };
+        
+        notificationSocket.onerror = (error) => {
+          notificationConnected = false;
+          updateStatusIndicator('notificationStatus', false);
+          addLog('error', `Notification service error: ${error.message}`);
+        };
+      } catch (error) {
+        notificationConnected = false;
+        updateStatusIndicator('notificationStatus', false);
+        addLog('error', `Failed to connect to notification service: ${error.message}`);
+      }
+    }
+    
+    // Connect to room-specific notification service
+    function connectToRoomNotificationService(roomId) {
+      // Close existing room notification connection if any
+      if (roomNotificationSocket) {
+        roomNotificationSocket.close();
+      }
+      
+      try {
+        // Connect to the specific room
+        roomNotificationSocket = new WebSocket(`${NOTIFICATION_WS_URL}/${roomId}`);
+        
+        roomNotificationSocket.onopen = () => {
+          roomNotificationConnected = true;
+          addLog('success', `Connected to notification service for room: ${roomId}`);
+          
+          // Send a ping to keep the connection alive
+          setInterval(() => {
+            if (roomNotificationConnected && roomNotificationSocket.readyState === WebSocket.OPEN) {
+              roomNotificationSocket.send(JSON.stringify({ type: 'ping' }));
+            }
+          }, 30000);
+        };
+        
+        roomNotificationSocket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            // Ignore ping/pong messages in logs but handle them
+            if (data.type === 'ping') {
+              roomNotificationSocket.send(JSON.stringify({ type: 'pong' }));
+              return;
+            } else if (data.type === 'pong') {
+              return;
+            }
+            
+            addLog('info', `Received message from room notification service: ${JSON.stringify(data)}`);
+            
+            // Handle different message types
+            if (data.type === 'request_created') {
+              addLog('info', `New help request created in room: ${data.request_id} - "${data.question}"`);
+              loadPendingRequestsForRoom(roomId);
+              
+              // Add system message to transcript
+              addTranscriptMessage(`Question escalated to supervisor: "${data.question}"`, "system");
+            } else if (data.type === 'request_resolved') {
+              addLog('success', `Help request resolved in room: ${data.request_id}`);
+              loadPendingRequestsForRoom(roomId);
+              
+              // Add AI response to transcript
+              addTranscriptMessage(`Response to "${data.question}": ${data.answer}`, "ai");
+            } else if (data.type === 'ai_message') {
+              // Handle direct messages from the AI agent
+              addTranscriptMessage(data.message, "ai");
+            } else if (data.type === 'user_message') {
+              // Handle transcribed user messages
+              addTranscriptMessage(data.message, "user");
+            }
+          } catch (error) {
+            addLog('error', `Error parsing room notification: ${error.message}`);
+          }
+        };
+        
+        roomNotificationSocket.onclose = () => {
+          roomNotificationConnected = false;
+          addLog('warn', `Disconnected from room notification service: ${roomId}`);
+          
+          // Only try to reconnect if still connected to the room
+          if (connected && currentRoomId === roomId) {
+            setTimeout(() => connectToRoomNotificationService(roomId), 5000);
+          }
+        };
+        
+        roomNotificationSocket.onerror = (error) => {
+          roomNotificationConnected = false;
+          addLog('error', `Room notification service error: ${error.message}`);
+        };
+      } catch (error) {
+        roomNotificationConnected = false;
+        addLog('error', `Failed to connect to room notification service: ${error.message}`);
+      }
+    }
+    
+    // Load pending requests
+    async function loadPendingRequests() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/pending-requests`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        const tableBody = document.querySelector('#requestsTable tbody');
+        tableBody.innerHTML = '';
+        
+        if (data.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No pending requests</td></tr>';
+          return;
+        }
+        
+        data.forEach(req => {
+          const row = document.createElement('tr');
+          row.dataset.requestId = req.id; // Store request ID in the row
+          
+          row.innerHTML = `
+            <td>${req.id}</td>
+            <td>${req.question}</td>
+            <td>${req.caller_info}</td>
+            <td>${req.created_at}</td>
+            <td><span class="badge badge-pending">${req.status}</span></td>
+          `;
+          
+          row.addEventListener('click', () => {
+            // Set the form fields
+            document.getElementById('requestId').value = req.id;
+            document.getElementById('question').value = req.question;
+            document.getElementById('answer').focus();
+            
+            // Show detailed view
+            selectedRequestId = req.id;
+            showRequestDetails(req);
+            
+            // Highlight selected row
+            document.querySelectorAll('#requestsTable tbody tr').forEach(r => {
+              r.style.backgroundColor = '';
+            });
+            row.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+          });
+          
+          tableBody.appendChild(row);
+        });
+      } catch (error) {
+        addLog('error', `Error loading pending requests: ${error.message}`);
+        document.querySelector('#requestsTable tbody').innerHTML = 
+          `<tr><td colspan="5" class="text-center">Error loading requests: ${error.message}</td></tr>`;
+      }
+    }
+    
+    // Show request details
+    function showRequestDetails(req) {
+      // Show the details card
+      document.getElementById('requestDetailsCard').style.display = 'block';
+      
+      // Populate fields
+      document.getElementById('detailsRequestId').textContent = req.id;
+      document.getElementById('detailsQuestion').textContent = req.question;
+      document.getElementById('detailsCaller').textContent = req.caller_info;
+      document.getElementById('detailsCreated').textContent = req.created_at;
+      document.getElementById('detailsStatus').textContent = req.status;
+    }
+    
+    // Load pending requests for a specific room
+    async function loadPendingRequestsForRoom(roomId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/pending-requests`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Filter requests for this room
+        const roomRequests = data.filter(req => {
+          const reqRoomId = req.caller_info.split('#')[0];
+          return reqRoomId === roomId;
+        });
+        
+        const pendingRequestsDiv = document.getElementById('pendingRequestsForRoom');
+        
+        if (roomRequests.length === 0) {
+          pendingRequestsDiv.innerHTML = 'No pending requests for this room';
+          return;
+        }
+        
+        let html = '<ul style="padding-left: 20px;">';
+        roomRequests.forEach(req => {
+          html += `<li><a href="#" class="check-request" data-id="${req.id}">ID: ${req.id}</a> - Question: "${req.question}"</li>`;
+        });
+        html += '</ul>';
+        
+        pendingRequestsDiv.innerHTML = html;
+        
+        // Add click handlers for the request links
+        document.querySelectorAll('.check-request').forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const requestId = link.getAttribute('data-id');
+            document.getElementById('requestIdToCheck').value = requestId;
+            checkRequestStatus(requestId);
+          });
+        });
+      } catch (error) {
+        addLog('error', `Error loading room requests: ${error.message}`);
+        document.getElementById('pendingRequestsForRoom').innerHTML = 
+          `Error loading room requests: ${error.message}`;
+      }
+    }
+    
+    // Check request status
+    async function checkRequestStatus(requestId) {
+      if (!requestId) {
+        requestId = document.getElementById('requestIdToCheck').value.trim();
+      }
+      
+      if (!requestId) {
+        showAlert(document.getElementById('voiceCallAlert'), 'Please enter a request ID', 'warning');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/check-request/${requestId}`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const resultDiv = document.getElementById('requestStatusResult');
+        
+        // Format and display the result
+        resultDiv.innerHTML = `
+          <h4>Request Status:</h4>
+          <p><strong>ID:</strong> ${data.id}</p>
+          <p><strong>Question:</strong> ${data.question}</p>
+          <p><strong>Status:</strong> ${data.status}</p>
+          <p><strong>Created:</strong> ${data.created_at}</p>
+          ${data.status === 'Resolved' ? `<p><strong>Answer:</strong> ${data.answer}</p>` : ''}
+        `;
+        
+        resultDiv.style.display = 'block';
+        addLog('info', `Checked status of request ${requestId}: ${data.status}`);
+      } catch (error) {
+        addLog('error', `Error checking request status: ${error.message}`);
+        const resultDiv = document.getElementById('requestStatusResult');
+        resultDiv.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+        resultDiv.style.display = 'block';
+      }
+    }
+    
+    // Load learned answers
+    async function loadLearnedAnswers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/learned-answers`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        const tableBody = document.querySelector('#knowledgeTable tbody');
+        tableBody.innerHTML = '';
+        
+        const entries = Object.entries(data);
+        if (entries.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="2" class="text-center">No learned answers yet</td></tr>';
+          return;
+        }
+        
+        entries.forEach(([question, answer]) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${question}</td>
+            <td>${answer}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } catch (error) {
+        addLog('error', `Error loading learned answers: ${error.message}`);
+        document.querySelector('#knowledgeTable tbody').innerHTML = 
+          `<tr><td colspan="2" class="text-center">Error loading learned answers: ${error.message}</td></tr>`;
+      }
+    }
+    
+    // Handle form submission to resolve a request
+    document.getElementById('resolveForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('requestId').value.trim();
+      const answer = document.getElementById('answer').value.trim();
+      const alertEl = document.getElementById('resolveFormAlert');
+      
+      if (!id || !answer) {
+        showAlert(alertEl, 'Please select a request and provide an answer', 'danger');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/resolve-request`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ id, answer })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        showAlert(alertEl, 'Answer submitted successfully!', 'success');
+        addLog('success', `Resolved help request ${id}`);
+        
+        // Reset form
+        document.getElementById('resolveForm').reset();
+        document.getElementById('requestDetailsCard').style.display = 'none';
+        selectedRequestId = null;
+        
+        // Reload data
+        setTimeout(() => {
+          loadPendingRequests();
+          loadLearnedAnswers();
+          // Update room-specific pending requests if in a room
+          if (currentRoomId) {
+            loadPendingRequestsForRoom(currentRoomId);
+          }
+        }, 1000);
+      } catch (error) {
+        showAlert(alertEl, `Error: ${error.message}`, 'danger');
+        addLog('error', `Error resolving request: ${error.message}`);
+      }
+    });
+    
+    // Check Request Status form handler
+    document.getElementById('checkRequestForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      checkRequestStatus();
+    });
+    
+    // Handle call simulation
+    document.getElementById('callForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const question = document.getElementById('callQuestion').value.trim();
+      const caller_info = document.getElementById('callerInfo').value.trim();
+      const alertEl = document.getElementById('simulatorAlert');
+      
+      if (!question) {
+        showAlert(alertEl, 'Please enter a question', 'danger');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/call`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ question, caller_info })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        document.getElementById('simulationResponse').textContent = JSON.stringify(data, null, 2);
+        
+        if (data.status === 'answered') {
+          showAlert(alertEl, `AI Agent Response: ${data.response}`, 'success');
+          addLog('info', `Simulation - Question answered: "${question}"`);
+        } else if (data.status === 'escalated') {
+          showAlert(alertEl, `Escalated to Supervisor. Help Request ID: ${data.help_request_id}`, 'info');
+          addLog('info', `Simulation - Question escalated: "${question}" (ID: ${data.help_request_id})`);
+          // Reload pending requests to show the new one
+          loadPendingRequests();
+        } else {
+          showAlert(alertEl, 'Unexpected response from AI Agent', 'danger');
+        }
+      } catch (error) {
+        showAlert(alertEl, `Error: ${error.message}`, 'danger');
+        addLog('error', `Simulation error: ${error.message}`);
+      }
+    });
+    
+    // Speech recognition for call simulator
+    document.getElementById('speakButton').addEventListener('click', function() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Your browser doesn't support speech recognition.");
+        return;
+      }
+      
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      
+      recognition.onstart = () => {
+        document.getElementById('callQuestion').value = "🎙️ Listening...";
+        addLog('info', 'Speech recognition started');
+      };
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('callQuestion').value = transcript;
+        addLog('info', `Speech recognized: "${transcript}"`);
+      };
+      
+      recognition.onerror = (event) => {
+        document.getElementById('callQuestion').value = "";
+        addLog('error', `Speech recognition error: ${event.error}`);
+      };
+      
+      recognition.start();
+    });
+    
+    // Get a token for LiveKit
+    async function getLiveKitToken(roomName, participantName) {
+      try {
+        const response = await fetch(`${TOKEN_SERVER_URL}/create-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            room_name: roomName,
+            participant_name: participantName
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Token server error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.token) {
+          throw new Error('No token received from server');
+        }
+        
+        return data.token;
+      } catch (error) {
+        addLog('error', `Error getting LiveKit token: ${error.message}`);
+        throw error;
+      }
+    }
+    
+    // Connect to LiveKit room
+    async function connectToRoom() {
+      const roomName = document.getElementById('roomName').value;
+      const participantName = document.getElementById('participantName').value;
+      
+      if (!roomName || !participantName) {
+        showAlert(document.getElementById('voiceCallAlert'), 'Please enter both room name and participant name', 'danger');
+        return;
+      }
+      
+      try {
+        // Update UI
+        showAlert(document.getElementById('voiceCallAlert'), 'Connecting to LiveKit...', 'info');
+        document.getElementById('connectButton').disabled = true;
+        addLog('info', `Connecting to LiveKit room: ${roomName}`);
+        
+        // Get token
+        const token = await getLiveKitToken(roomName, participantName);
+        
+        // Set current room ID for notification filtering
+        currentRoomId = `room-${roomName}`;
+        
+        // Connect to room-specific notification service to receive messages from voice agent
+        connectToRoomNotificationService(currentRoomId);
+        
+        // Load pending requests for this room
+        loadPendingRequestsForRoom(currentRoomId);
+        
+        // Initialize room
+        // Make sure we import LiveKit properly
+        const LiveKit = window.LivekitClient || window.livekit;
+        if (!LiveKit || !LiveKit.Room) {
+          throw new Error('LiveKit client library not loaded properly');
+        }
+        
+        room = new LiveKit.Room({
+          adaptiveStream: true,
+          dynacast: true,
+        });
+        
+        addLog('info', 'LiveKit room created');
+        
+        // Add event listeners
+        room.on(LiveKit.RoomEvent.ParticipantConnected, handleParticipantConnected);
+        room.on(LiveKit.RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+        room.on(LiveKit.RoomEvent.TrackSubscribed, handleTrackSubscribed);
+        room.on(LiveKit.RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed);
+        room.on(LiveKit.RoomEvent.Disconnected, handleDisconnected);
+        
+        // Connect to room
+        await room.connect(LIVEKIT_SERVER, token);
+        addLog('success', `Connected to LiveKit room: ${roomName}`);
+        
+        // Update UI
+        connected = true;
+        showAlert(document.getElementById('voiceCallAlert'), 'Connected to LiveKit room!', 'success');
+        document.getElementById('connectionStatus').textContent = 'Connected';
+        document.getElementById('connectionStatus').style.color = '#4cc9f0';
+        document.getElementById('currentRoom').textContent = roomName;
+        document.getElementById('connectButton').disabled = true;
+        document.getElementById('disconnectButton').disabled = false;
+        updateParticipantCount();
+        
+        // Add first transcript message
+        addTranscriptMessage("System is ready. AI receptionist will greet you when you activate the microphone.", "system");
+        
+        // Try to register RPC method if supported
+        try {
+          if (room.localParticipant && typeof room.localParticipant.registerRpcMethod === 'function') {
+            room.localParticipant.registerRpcMethod('getUserResponse', async (data) => {
+              const parsed = JSON.parse(data.payload);
+              addLog('info', `Received RPC call from AI: ${JSON.stringify(parsed)}`);
+              
+              // Handle different function calls
+              if (parsed.function === 'getAnswer') {
+                // AI is asking for an answer to a specific question
+                addTranscriptMessage(`AI is asking for supervisor input on: "${parsed.question}"`, "system");
+                
+                // You could implement a popup here or use the existing UI
+                return JSON.stringify({
+                  status: "processing",
+                  message: "Your request has been received by the supervisor. Please wait for a response."
+                });
+              }
+              
+              return JSON.stringify({ status: "ok" });
+            });
+            addLog('success', 'RPC method registered successfully');
+          } else {
+            addLog('warn', 'RPC registration not supported by this LiveKit client version');
+          }
+        } catch (error) {
+          addLog('error', `Failed to register RPC method: ${error.message}`);
+        }
+        
+      } catch (error) {
+        addLog('error', `Error connecting to LiveKit: ${error.message}`);
+        showAlert(document.getElementById('voiceCallAlert'), `Connection error: ${error.message}`, 'danger');
+        document.getElementById('connectButton').disabled = false;
+      }
+    }
+    
+    // Disconnect from LiveKit room
+    async function disconnectFromRoom() {
+      if (room && connected) {
+        try {
+          // Stop microphone if active
+          if (micEnabled && localAudioTrack) {
+            try {
+              await room.localParticipant.unpublishTrack(localAudioTrack);
+              await localAudioTrack.stop();
+              addLog('info', 'Microphone stopped');
+            } catch (error) {
+              addLog('error', `Error stopping audio track: ${error.message}`);
+            }
+            micEnabled = false;
+            document.getElementById('micStatus').textContent = 'Inactive';
+            document.getElementById('micStatus').style.color = '#f72585';
+          }
+          
+          // Disconnect from room
+          await room.disconnect();
+          connected = false;
+          addLog('info', 'Disconnected from LiveKit room');
+          
+          // Close room-specific notification socket
+          if (roomNotificationSocket) {
+            roomNotificationSocket.close();
+            roomNotificationConnected = false;
+          }
+          
+          // Update UI
+          showAlert(document.getElementById('voiceCallAlert'), 'Disconnected from LiveKit', 'info');
+          document.getElementById('connectionStatus').textContent = 'Disconnected';
+          document.getElementById('connectionStatus').style.color = '#f72585';
+          document.getElementById('currentRoom').textContent = '-';
+          document.getElementById('connectButton').disabled = false;
+          document.getElementById('disconnectButton').disabled = true;
+          document.getElementById('micButton').classList.remove('active');
+          updateParticipantCount();
+          
+          // Reset current room ID
+          currentRoomId = null;
+          document.getElementById('pendingRequestsForRoom').innerHTML = 'No pending requests';
+          document.getElementById('requestStatusResult').style.display = 'none';
+        } catch (error) {
+          addLog('error', `Error disconnecting from LiveKit: ${error.message}`);
+        }
+      }
+    }
+    
+    // Toggle microphone
+    async function toggleMicrophone() {
+      if (!connected) {
+        showAlert(document.getElementById('voiceCallAlert'), 'Please connect to a room first', 'warning');
+        return;
+      }
+      
+      const micButton = document.getElementById('micButton');
+      
+      if (micEnabled) {
+        // Disable microphone
+        try {
+          if (localAudioTrack) {
+            await room.localParticipant.unpublishTrack(localAudioTrack);
+            await localAudioTrack.stop();
+            localAudioTrack = null;
+          }
+          micButton.classList.remove('active');
+          addTranscriptMessage("Microphone muted", "system");
+          micEnabled = false;
+          addLog('info', 'Microphone disabled');
+          document.getElementById('micStatus').textContent = 'Inactive';
+          document.getElementById('micStatus').style.color = '#f72585';
+        } catch (error) {
+          addLog('error', `Error disabling microphone: ${error.message}`);
+          addTranscriptMessage(`Error disabling microphone: ${error.message}`, "system");
+        }
+      } else {
+        // Enable microphone
+        try {
+          // Get the LiveKit library reference
+          const LiveKit = window.LivekitClient || window.livekit;
+          if (!LiveKit) {
+            throw new Error('LiveKit client library not loaded properly');
+          }
+          
+          // Create local audio track
+          const tracks = await LiveKit.createLocalTracks({
+            audio: true,
+            video: false
+          });
+          
+          localAudioTrack = tracks[0]; // Get the audio track
+          
+          // Publish the track to the room
+          await room.localParticipant.publishTrack(localAudioTrack);
+          
+          micButton.classList.add('active');
+          addTranscriptMessage("Microphone active - speak now", "system");
+          micEnabled = true;
+          addLog('success', 'Microphone enabled');
+          document.getElementById('micStatus').textContent = 'Active';
+          document.getElementById('micStatus').style.color = '#4cc9f0';
+        } catch (error) {
+          addLog('error', `Error enabling microphone: ${error.message}`);
+          addTranscriptMessage(`Error enabling microphone: ${error.message}`, "system");
+        }
+      }
+    }
+    
+    // Add message to transcript
+    function addTranscriptMessage(message, type) {
+      const transcript = document.getElementById('transcript');
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${type}-message`;
+      
+      if (type === 'user') {
+        messageEl.textContent = `You: ${message}`;
+      } else if (type === 'ai') {
+        messageEl.textContent = `AI: ${message}`;
+      } else {
+        // System message
+        messageEl.className = 'system-message';
+        messageEl.textContent = message;
+      }
+      
+      transcript.appendChild(messageEl);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+    
+    // Update participant count - FIX FOR THE 'SIZE' ERROR
+    function updateParticipantCount() {
+      if (room && connected) {
+        try {
+          // Different LiveKit versions handle participants differently
+          let count = 1; // Start with 1 for local participant
+          
+          // Try different methods to get participants count
+          if (room.participants && typeof room.participants.size === 'number') {
+            // Map style with 'size' property
+            count += room.participants.size;
+          } else if (room.participants && Array.isArray(room.participants)) {
+            // Array style
+            count += room.participants.length;
+          } else if (room.remoteParticipants && typeof room.remoteParticipants.size === 'number') {
+            // Some versions use remoteParticipants
+            count += room.remoteParticipants.size;
+          } else if (room.remoteParticipants && Array.isArray(room.remoteParticipants)) {
+            count += room.remoteParticipants.length;
+          } else {
+            // Manual count if we can iterate
+            if (room.participants) {
+              if (typeof room.participants.forEach === 'function') {
+                // If it's an iterable or has forEach
+                let tempCount = 0;
+                room.participants.forEach(() => tempCount++);
+                count += tempCount;
+              } else if (typeof room.participants.entries === 'function') {
+                // If it's a Map or has entries
+                let tempCount = 0;
+                for (const [, ] of room.participants.entries()) {
+                  tempCount++;
+                }
+                count += tempCount;
+              }
+            }
+          }
+          
+          document.getElementById('participantCount').textContent = count;
+        } catch (error) {
+          addLog('error', `Error updating participant count: ${error.message}`);
+          document.getElementById('participantCount').textContent = '?';
+        }
+      } else {
+        document.getElementById('participantCount').textContent = '0';
+      }
+    }
+    
+    // Event handlers for LiveKit
+    function handleParticipantConnected(participant) {
+      addTranscriptMessage(`${participant.identity} connected`, "system");
+      addLog('info', `Participant connected: ${participant.identity}`);
+      updateParticipantCount();
+      
+      // Check if this is the AI participant
+      if (participant.identity.toLowerCase().includes('agent') || 
+          participant.identity.toLowerCase().includes('receptionist') || 
+          participant.identity.toLowerCase().includes('assistant')) {
+        addTranscriptMessage("AI receptionist has joined the call", "system");
+      }
+    }
+    
+    function handleParticipantDisconnected(participant) {
+      addTranscriptMessage(`${participant.identity} disconnected`, "system");
+      addLog('info', `Participant disconnected: ${participant.identity}`);
+      updateParticipantCount();
+      
+      // Check if this is the AI participant
+      if (participant.identity.toLowerCase().includes('agent') || 
+          participant.identity.toLowerCase().includes('receptionist') || 
+          participant.identity.toLowerCase().includes('assistant')) {
+        addTranscriptMessage("AI receptionist has left the call", "system");
+      }
+    }
+    
+    // Handle track subscribed to capture transcribed audio
+    function handleTrackSubscribed(track, publication, participant) {
+      if (track.kind === 'audio') {
+        addLog('info', `Subscribed to audio from ${participant.identity}`);
+        
+        // Create an audio element to play the track
+        const audioEl = new Audio();
+        track.attach(audioEl);
+        audioEl.play().catch(error => {
+          addLog('error', `Error playing audio: ${error.message}`);
+        });
+        
+        // Check if this is the AI participant
+        if (participant.identity.toLowerCase().includes('agent') || 
+            participant.identity.toLowerCase().includes('receptionist') || 
+            participant.identity.toLowerCase().includes('assistant')) {
+          addLog('info', `AI audio track subscribed`);
+        }
+      }
+    }
+    
+    function handleTrackUnsubscribed(track) {
+      if (track.kind === 'audio') {
+        addLog('info', 'Audio track unsubscribed');
+        track.detach();
+      }
+    }
+    
+    function handleDisconnected() {
+      addTranscriptMessage("Disconnected from room", "system");
+      addLog('warn', 'Disconnected from LiveKit room');
+      document.getElementById('connectButton').disabled = false;
+      document.getElementById('disconnectButton').disabled = true;
+      document.getElementById('connectionStatus').textContent = 'Disconnected';
+      document.getElementById('connectionStatus').style.color = '#f72585';
+      document.getElementById('currentRoom').textContent = '-';
+      document.getElementById('micButton').classList.remove('active');
+      connected = false;
+      updateParticipantCount();
+      
+      // Close room-specific notification socket
+      if (roomNotificationSocket) {
+        roomNotificationSocket.close();
+        roomNotificationConnected = false;
+      }
+    }
+    
+    // Helper function to show alerts
+    function showAlert(element, message, type) {
+      element.textContent = message;
+      element.className = `alert alert-${type}`;
+      element.style.display = 'block';
+      
+      // Hide after 5 seconds
+      setTimeout(() => {
+        element.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Connect LiveKit event listeners
+    document.getElementById('connectButton').addEventListener('click', connectToRoom);
+    document.getElementById('disconnectButton').addEventListener('click', disconnectFromRoom);
+    document.getElementById('micButton').addEventListener('click', toggleMicrophone);
+    
+    // Initialize the page
+    addLog('info', 'Dashboard initialized');
+    checkServicesStatus();
+    loadPendingRequests();
+    loadLearnedAnswers();
+    
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+      // Check services status silently (don't reload everything)
+      if (notificationSocket && notificationSocket.readyState !== WebSocket.OPEN) {
+        updateStatusIndicator('notificationStatus', false);
+        connectToNotificationService();
+      }
+      
+      // Only refresh the active tab
+      const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+      if (activeTab === 'requests') {
+        loadPendingRequests();
+      } else if (activeTab === 'knowledge') {
+        loadLearnedAnswers();
+      }
+      
+      // Refresh room-specific pending requests if connected
+      if (currentRoomId) {
+        loadPendingRequestsForRoom(currentRoomId);
+        
+        // Check room notification socket
+        if (roomNotificationSocket && roomNotificationSocket.readyState !== WebSocket.OPEN) {
+          connectToRoomNotificationService(currentRoomId);
+        }
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
