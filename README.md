@@ -107,7 +107,7 @@ Data Flow:
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:ydv-manoj/ai-helpdesk.git
    cd salon-frontdesk-ai
    ```
 
@@ -156,7 +156,7 @@ Data Flow:
    ```
 
 7. **Access the supervisor dashboard**
-   - Start localport 5500 for /static/index.html
+   - Start local port 5500 for /static/index.html
 
 
 ## Usage
