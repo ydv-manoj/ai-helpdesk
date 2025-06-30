@@ -120,6 +120,10 @@ Data Flow:
 
 3. **Install dependencies**
    ```bash
+   pip install \
+   "livekit-agents[deepgram,openai,cartesia,silero,turn-detector]~=1.0" \
+   "livekit-plugins-noise-cancellation~=0.2" \
+   "python-dotenv"
    pip install -r requirements.txt
    ```
 
