@@ -184,12 +184,8 @@ Data Flow:
 - httpx
 - python-dotenv
 - asyncio
-- livekit-server-sdk
+- livekit
 - livekit-agents
-- groq
-- cartesia
-- deepgram
-- silero
 - pydantic
 - uuid
 - requests

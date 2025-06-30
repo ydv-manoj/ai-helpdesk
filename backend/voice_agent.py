@@ -13,8 +13,7 @@ from livekit.agents import (
     RunContext
 )
 from livekit.plugins import (
-    groq,  # Using groq since that's what your logs show
-    cartesia,
+    groq,
     deepgram,
     noise_cancellation,
     silero,
@@ -629,11 +628,12 @@ async def entrypoint(ctx: agents.JobContext):
         stt=deepgram.STT(model="nova-3", language="en"),
         
         # Language model 
-        llm=groq.LLM(model="deepseek-r1-distill-llama-70b"),
+        llm=groq.LLM(model="meta-llama/llama-4-maverick-17b-128e-instruct"),
         
         # Text to speech
-        tts=cartesia.TTS(),
-        
+        tts=deepgram.TTS(
+            model="aura-2-athena-en",
+        ),
         # Voice activity detection
         vad=silero.VAD.load(),
         
